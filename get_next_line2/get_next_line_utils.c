@@ -6,7 +6,7 @@
 /*   By: namalier <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 17:25:13 by namalier          #+#    #+#             */
-/*   Updated: 2024/01/04 19:34:17 by namalier         ###   ########.fr       */
+/*   Updated: 2024/01/05 15:42:25 by namalier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,11 +33,27 @@ void ft_gnlmove(char *buf, char *line, size_t stop)
 		return ;
 	while (line[i] && line[i] != '\n')
 		i++;
-	if (i == stop && line[i + 1])
+	if (line [i] && line[i + 1] && i == stop)
 	{
 		while (line[++i])
 			buf[j++] = line[i];
 		line[++stop] = '\0';
 	}
 	buf[j] = '\0';
+}
+
+char *ft_movenewline(char *line, char *buf)
+{
+	char	*newline;
+	int		stop;
+
+	newline = ft_gnlchr(line, '\n');                                            
+	if (newline != NULL)                                                        
+	{                                                                           
+		stop = ft_checkline(line);                                              
+		ft_gnlmove(buf, line, stop);                                            
+	}                                                                           
+	else                                                                        
+		ft_gnlmove(buf, line, ft_gnllen(line));
+	return (line);
 }

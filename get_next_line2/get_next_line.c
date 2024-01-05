@@ -6,7 +6,7 @@
 /*   By: namalier <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 15:04:22 by namalier          #+#    #+#             */
-/*   Updated: 2024/01/04 19:34:14 by namalier         ###   ########.fr       */
+/*   Updated: 2024/01/05 17:56:14 by namalier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,17 +22,17 @@ int	ft_gnllen(char *str)
 	return (i);
 }
 
-char *ft_gnljoin(char *s1, char *s2, size_t len)
+char *ft_gnljoin(char *s1, char *s2)
 {
 	size_t	i;
 	size_t	j;
 	char	*join;
 
-	if (!s1 || !s2)
+	if (!s2)
 		return (NULL);
 	i = 0;
 	j = 0;
-	join = malloc((ft_gnllen(s1) + len + 1) * sizeof (char));
+	join = malloc((ft_gnllen(s1) + ft_gnllen(s2) + 1) * sizeof (char));
 	if (!join)
 		return (NULL);
 	while (s1[i])
@@ -40,7 +40,7 @@ char *ft_gnljoin(char *s1, char *s2, size_t len)
 		join[i] = s1[i];
 		i++;
 	}
-	while (j < len)
+	while (s2[j])
 		join[i++] = s2[j++];
 	join[i] = '\0';
 	free (s1);
@@ -67,7 +67,10 @@ char *ft_gnldup(char *str)
 	char	*dup;
 
 	i = 0;
-	dup = malloc(ft_gnllen(str) + 1 * sizeof (char));
+	if (str[i])
+		dup = malloc(ft_gnllen(str) + 1 * sizeof (char));
+	else
+		dup = malloc(1 * sizeof(char));
 	if (!dup)
 		return (NULL);
 	while (str[i])
@@ -75,34 +78,32 @@ char *ft_gnldup(char *str)
 		dup[i] = str[i];
 		i++;
 	}
-	dup[i] = '\0';
+	dup[i] = 0;
 	return (dup);
 }
 
 char *get_next_line(int fd)
 {
-	static char	buf[BUFFER_SIZE + 1] = "";
+	static char	buf[BUFFER_SIZE + 1] = "\0";
 	char		*line;
-	size_t		nread;
-	char		*newline;
-	int			stop;
+	ssize_t		nread;
 
+	nread = 1;
+	if (fd < 0 || BUFFER_SIZE < 1)
+		return (NULL);
 	line = ft_gnldup(buf);
-	while (!(ft_gnlchr(line, '\n')) && (nread = read(fd, buf, BUFFER_SIZE)) > 0)
+	if (!(ft_gnlchr(line, '\n')))
+		nread = read(fd, buf, BUFFER_SIZE);
+	while (!(ft_gnlchr(line, '\n')) && nread > 0)
 	{
 		buf[nread] = '\0';
-		line = ft_gnljoin(line, buf, nread);
+		line = ft_gnljoin(line, buf);
+		if (!(ft_gnlchr(line, '\n')))
+			nread = read(fd, buf, BUFFER_SIZE);
 	}
-	if (ft_gnllen(line) == 0)
-		return (NULL);
-	newline = ft_gnlchr(line, '\n');
-	if (newline != NULL)
-	{
-		stop = ft_checkline(line);
-		ft_gnlmove(buf, line, stop);
-	}
-	else
-		ft_gnlmove(buf, line, ft_gnllen(line));
+	if (ft_gnllen(line) == 0 || nread < 0)
+		return (free (line), NULL);
+	line = ft_movenewline(line, buf);
 	return (line);
 }
 
@@ -115,10 +116,25 @@ int main ()
 	char	*str = "";
 
 	fd = open("test.txt", O_RDONLY);
+	
 	while(str)
 	{
 		str = get_next_line(fd);
-		printf("|%s|", str);
+		printf("%s", str);
+		free (str);
+		str = get_next_line(fd);
+		printf("%s", str);
+		free (str);
+		str = get_next_line(fd);
+		printf("%s", str);
+		free (str);
+		str = get_next_line(fd);
+		printf("%s", str);
+		free (str);
+		str = get_next_line(fd);
+		printf("%s", str);
+		free (str);
 	}
+	close(fd);
 	return (0);
 }
