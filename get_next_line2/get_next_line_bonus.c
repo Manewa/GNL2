@@ -1,16 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: namalier <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 15:04:22 by namalier          #+#    #+#             */
-/*   Updated: 2024/01/09 15:03:48 by namalier         ###   ########.fr       */
+/*   Updated: 2024/01/09 16:40:36 by namalier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include<stdio.h>
+#include "get_next_line_bonus.h"
 
 int	ft_gnllen(char *str)
 {
@@ -84,40 +85,18 @@ char	*ft_gnldup(char *str)
 
 char	*get_next_line(int fd)
 {
-	static char	buf[BUFFER_SIZE + 1];
+	static char	buf[MAX_FD][BUFFER_SIZE + 1];
 	char		*line;
 	ssize_t		nread;
 
 	nread = 1;
-	if (fd < 0 || BUFFER_SIZE < 1)
+	if (fd < 0 || BUFFER_SIZE < 1 || fd > MAX_FD)
 		return (NULL);
-	line = ft_gnldup(buf);
+	line = ft_gnldup(buf[fd]);
 	if (!line)
 		return (NULL);
 	if (!(ft_gnlchr(line, '\n')))
-		nread = read(fd, buf, BUFFER_SIZE);
-	line = ft_movenewline(line, buf, nread, fd);
+		nread = read(fd, buf[fd], BUFFER_SIZE);
+	line = ft_movenewline(line, buf[fd], nread, fd);
 	return (line);
 }
-/*
-#include<stdio.h>
-#include <fcntl.h>
-
-int main ()
-{
-	int	fd;
-	char	*str = "";
-
-	fd = open("test.txt", O_RDONLY);
-	str = get_next_line(fd);
-	printf("%s", str);
-	free (str);
-	str = get_next_line(fd);
-	printf("%s", str);
-	free (str);
-	str = get_next_line(fd);
-	printf("%s", str);
-	free (str);
-	close(fd);
-	return (0);
-}*/
